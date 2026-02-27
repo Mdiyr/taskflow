@@ -1,0 +1,68 @@
+# ==============================
+# Go build artifacts
+# ==============================
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+*.cover
+*.coverprofile
+
+# Go workspace (Go 1.18+)
+go.work
+go.work.sum
+
+# ==============================
+# Build directories
+# ==============================
+bin/
+dist/
+build/
+
+# ==============================
+# Vendor (optional)
+# ==============================
+# Uncomment if you DON'T commit vendor folder
+# vendor/
+
+# ==============================
+# Logs
+# ==============================
+*.log
+
+# ==============================
+# Environment files
+# ==============================
+.env
+.env.local
+.env.*
+
+# ==============================
+# macOS system files
+# ==============================
+.DS_Store
+
+# ==============================
+# IDE / Editor
+# ==============================
+.vscode/
+.idea/
+
+# JetBrains
+*.iml
+
+# ==============================
+# Test coverage
+# ==============================
+coverage.out
+*.coverprofile
+
+# ==============================
+# Temporary files
+# ==============================
+tmp/
+temp/
+
