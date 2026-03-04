@@ -10,6 +10,7 @@
 *.out
 *.cover
 *.coverprofile
+todo
 
 # Go workspace (Go 1.18+)
 go.work
