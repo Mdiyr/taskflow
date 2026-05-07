@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -30,10 +31,14 @@ type Category struct {
 	Color  string
 }
 
-var userStorage []User
-var AuthenticatedUser *User
-var taskStorage []Task
-var categoryStorage []Category
+
+var (
+	userStorage []User
+	AuthenticatedUser *User
+	taskStorage []Task
+	categoryStorage []Category
+	serializationMode string
+)
 
 const userStoragePath = "user.txt"
 
@@ -44,8 +49,17 @@ func main() {
 	//load user storage from file
 	loadUserStorageFromFile()
 
+
+	serializeMode := flag.String("serialize-mode", "junkserialization", "to change a direction of save files")
 	command := flag.String("command", "no-command", "command to run")
 	flag.Parse()
+
+	switch *serializeMode {
+	case "junkserialization":
+		serializationMode = "junkserialization"
+	default:
+		serializationMode = "json"
+	}
 
 	for {
 		runCommand(*command)
@@ -55,7 +69,7 @@ func main() {
 		scanner.Scan()
 		*command = scanner.Text()
 
-	}
+}
 }
 
 func runCommand(command string) {
@@ -195,32 +209,13 @@ func registerUser() {
 
 	userStorage = append(userStorage, user)
 
+
+	writeUserToFile(user)
+
 	//findout file exist or not
-	var file *os.File
 
-	file, err := os.OpenFile(userStoragePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
-	if err != nil {
-		fmt.Printf("can not create or open file: %v\n ", err)
-
-		return
-	}
-
-	// save user data in user.txt file
-	data := fmt.Sprintf("id: %d, name: %s, email: %s, password: %s\n", user.ID, user.Name, user.Email, user.Password)
-
-	var b = []byte(data)
-
-	numberOfWrittenBytes, wErr := file.Write(b)
-	if wErr != nil {
-		fmt.Printf("can not write to the file %v\n ", wErr)
-
-		return
-	}
-
-	fmt.Println("numberOfWrittenBytes:", numberOfWrittenBytes)
-
-	file.Close()
 }
+
 func login() {
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -302,3 +297,42 @@ func login() {
 				fmt.Printf("user: %+v\n" , user)
 		}
 	}
+
+func writeUserToFile(user User){
+	var file *os.File
+
+	file, err := os.OpenFile(userStoragePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Printf("can not create or open file: %v\n ", err)
+
+		return
+	}
+	defer file.Close()
+
+	// serialize the user struct/object
+	var data []byte
+	if serializationMode == "junkserialization" {
+		data = []byte(fmt.Sprintf("id: %d, name: %s, email: %s, password: %s\n", user.ID, user.Name, user.Email, user.Password))
+	} else if serializationMode == "json" {
+		//json
+		data , err = json.Marshal(user)
+		if err != nil {
+			fmt.Println("can't marshal user struct to json" , err)
+
+			return
+		}
+	} else {
+		fmt.Println("invalid serialization mode")
+
+		return
+	}
+
+	numberOfWrittenBytes, wErr := file.Write(data)
+	if wErr != nil {
+		fmt.Printf("can not write to the file %v\n ", wErr)
+
+		return
+	}
+
+	fmt.Println("numberOfWrittenBytes:", numberOfWrittenBytes)
+}
